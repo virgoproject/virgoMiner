@@ -1,21 +1,24 @@
 package io.virgo.virgoMiner;
 
-import java.util.Arrays;
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
-import io.virgo.geoWeb.GeoWeb;
-import io.virgo.virgoCryptoLib.Sha256;
-import io.virgo.virgoCryptoLib.Sha256Hash;
+import io.virgo.randomX.RandomX_VM;
+import io.virgo.virgoAPI.VirgoAPI;
+import io.virgo.virgoCryptoLib.Converter;
 
 public class Worker implements Runnable {
 
-	long baseNonce = 0;
+	long workerId = 0;
 	volatile long nonce = 0;
 	
-	public Worker(long baseNonce) {
-		this.baseNonce = baseNonce;
+	RandomX_VM vm;
+	
+	public Worker(long workerId, RandomX_VM vm) {
+		this.workerId = workerId;
+		this.vm = vm;
 	}
 	
 	@Override
@@ -27,17 +30,26 @@ public class Worker implements Runnable {
 				
 			long date = System.currentTimeMillis();
 			
-			Sha256Hash txHash = Sha256.getDoubleHash((
+			byte[] txHash = vm.getHash((
 					Main.header
 					+ date
+					+ Main.machineUid
+					+ workerId
 					+ nonce
 					).getBytes());
 			
 			
 			Main.hashes++;
+						
+			byte[] hashPadded = new byte[txHash.length + 1];
+			for (int i = 0; i < txHash.length; i++) {
+				hashPadded[i + 1] = txHash[i];
+			}
 			
-			if(txHash.toLong() < Main.MAX/Main.difficulty) {
-
+			BigInteger hashValue = new BigInteger(ByteBuffer.wrap(hashPadded).array());
+						
+			if(hashValue.compareTo(Main.MAX.divide(Main.difficulty)) < 0) {
+				System.out.println("found: " + hashValue + " " + Main.MAX.divide(Main.difficulty));
 				Main.found = true;
 				
 				JSONObject transaction = new JSONObject();
@@ -45,13 +57,10 @@ public class Worker implements Runnable {
 				transaction.put("outputs", Main.outputs);
 				transaction.put("parentBeacon", Main.parentBeacon);
 				transaction.put("date", date);
-				transaction.put("nonce", nonce);
+				transaction.put("nonce", ""+Main.machineUid+workerId+nonce);
+
+				VirgoAPI.getInstance().broadcastTransaction(transaction);
 				
-				JSONObject txMessage = new JSONObject();
-				txMessage.put("command", "txs");
-				txMessage.put("txs", new JSONArray(Arrays.asList(transaction)));
-				
-				GeoWeb.getInstance().broadCast(txMessage);
 				continue;
 			}
 			

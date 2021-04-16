@@ -1,10 +1,12 @@
 package io.virgo.virgoMiner;
 
+import java.util.Arrays;
+
 import org.json.JSONArray;
 
-import io.virgo.geoWeb.ResponseCode;
 import io.virgo.virgoAPI.VirgoAPI;
 import io.virgo.virgoAPI.crypto.TxOutput;
+import io.virgo.virgoAPI.network.ResponseCode;
 import io.virgo.virgoAPI.requestsResponses.GetPoWInformationsResponse;
 
 public class MiningInformationsUpdater implements Runnable {
@@ -12,7 +14,7 @@ public class MiningInformationsUpdater implements Runnable {
 	@Override
 	public void run() {
 		
-		TxOutput out = new TxOutput("V2N5tYdd1Cm1xqxQDsY15x9ED8kyAUvjbWv", (long) (5 * Math.pow(10, VirgoAPI.DECIMALS)));
+		TxOutput out = new TxOutput("V2VTfojDdcThpiuDWg3uvW8ecwKggrraE9d", (long) (5 * Math.pow(10, VirgoAPI.DECIMALS)));
 		JSONArray outputs = new JSONArray();
 		outputs.put(out.toString());
 		
@@ -20,12 +22,22 @@ public class MiningInformationsUpdater implements Runnable {
 		
 		while(!Thread.currentThread().isInterrupted()) {
 			GetPoWInformationsResponse resp = VirgoAPI.getInstance().getPowInformations();
-			if(resp.getResponseCode().equals(ResponseCode.OK)) {
+			if(resp.getResponseCode() == ResponseCode.OK) {
 				
 				boolean changed = false;
 				
 				if(!Main.parentBeacon.equals(resp.getParentBeaconUid()))
 					changed = true;
+				
+				if(!Arrays.equals(Main.key, resp.getRandomXKey().getBytes())) {
+					Main.key = resp.getRandomXKey().getBytes();
+					if(Main.rx != null) {
+						changed = true;
+						Main.found = true;
+						Main.rx.changeKey(resp.getRandomXKey().getBytes());
+					}
+
+				}
 				
 				Main.parentBeacon = resp.getParentBeaconUid();
 				Main.difficulty = resp.getDifficulty();
@@ -45,7 +57,7 @@ public class MiningInformationsUpdater implements Runnable {
 			
 				if(changed == true) {
 					for(Worker worker : Main.workers)
-						worker.nonce = worker.baseNonce;
+						worker.nonce = 0;
 					
 					Main.found = false;
 				}

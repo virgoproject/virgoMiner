@@ -10,7 +10,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
         <configuration>
-          <release>14</release>
+          <release>11</release>
         </configuration>
       </plugin>
     </plugins>
@@ -33,15 +33,15 @@
 	  <artifactId>virgoCryptoLib</artifactId>
 	  <version>0.0.5</version>
 	</dependency>
-	<dependency>
-	  <groupId>io.virgo</groupId>
-	  <artifactId>geoWeb</artifactId>
-	  <version>0.0.8</version>
-	</dependency>
   	<dependency>
 	  <groupId>io.virgo</groupId>
 	  <artifactId>virgoAPI</artifactId>
-	  <version>0.0.6d</version>
+	  <version>0.0.7q</version>
 	</dependency>
+   <dependency>
+      <groupId>io.virgo</groupId>
+      <artifactId>randomX</artifactId>
+      <version>0.0.2a</version>
+   </dependency>
   </dependencies>
 </project>
