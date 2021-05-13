@@ -14,7 +14,7 @@ public class MiningInformationsUpdater implements Runnable {
 	@Override
 	public void run() {
 		
-		TxOutput out = new TxOutput("V2FRYJPZeSKW6cnam79ZHyaaYxRbzt9fVXG", (long) (5 * Math.pow(10, VirgoAPI.DECIMALS)));
+		TxOutput out = new TxOutput(Main.rewardAddress, (long) (5 * Math.pow(10, VirgoAPI.DECIMALS)));
 		JSONArray outputs = new JSONArray();
 		outputs.put(out.toString());
 		
@@ -65,7 +65,7 @@ public class MiningInformationsUpdater implements Runnable {
 			}
 			
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(100);
 			} catch (InterruptedException e) {}
 			
 		}

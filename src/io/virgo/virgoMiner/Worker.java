@@ -49,7 +49,7 @@ public class Worker implements Runnable {
 			BigInteger hashValue = new BigInteger(ByteBuffer.wrap(hashPadded).array());
 						
 			if(hashValue.compareTo(Main.MAX.divide(Main.difficulty)) < 0) {
-				System.out.println("found: " + hashValue + " " + Main.MAX.divide(Main.difficulty));
+				System.out.println("\n found: " + hashValue + " " + Main.MAX.divide(Main.difficulty));
 				Main.found = true;
 				
 				JSONObject transaction = new JSONObject();
