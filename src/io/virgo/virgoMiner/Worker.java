@@ -8,6 +8,8 @@ import org.json.JSONObject;
 import io.virgo.randomX.RandomX_VM;
 import io.virgo.virgoAPI.VirgoAPI;
 import io.virgo.virgoCryptoLib.Converter;
+import io.virgo.virgoCryptoLib.Sha256;
+import io.virgo.virgoCryptoLib.Sha256Hash;
 
 public class Worker implements Runnable {
 
@@ -27,37 +29,33 @@ public class Worker implements Runnable {
 		while(!Thread.currentThread().isInterrupted()) {
 			if(Main.found)
 				continue;
-				
+							
 			long date = System.currentTimeMillis();
 			
-			byte[] txHash = vm.getHash((
-					Main.header
-					+ date
-					+ Main.machineUid
-					+ workerId
-					+ nonce
-					).getBytes());
+			Sha256Hash txHash = Sha256.getDoubleHash(Converter.concatByteArrays(Main.header,
+					Main.parentBeacon.toBytes(), Converter.longToBytes(date), Converter.longToBytes(Main.machineUid+workerId+nonce)));
 			
+			byte[] randomXHash = vm.getHash(txHash.toBytes());
 			
 			Main.hashes++;
 						
-			byte[] hashPadded = new byte[txHash.length + 1];
-			for (int i = 0; i < txHash.length; i++) {
-				hashPadded[i + 1] = txHash[i];
+			byte[] hashPadded = new byte[randomXHash.length + 1];
+			for (int i = 0; i < randomXHash.length; i++) {
+				hashPadded[i + 1] = randomXHash[i];
 			}
 			
 			BigInteger hashValue = new BigInteger(ByteBuffer.wrap(hashPadded).array());
 						
 			if(hashValue.compareTo(Main.MAX.divide(Main.difficulty)) < 0) {
-				System.out.println("\n found: " + hashValue + " " + Main.MAX.divide(Main.difficulty));
+				System.out.println("\n found: " + hashValue + " " + Main.MAX.divide(Main.difficulty) + " " + Main.parentBeacon.toString());
 				Main.found = true;
 				
 				JSONObject transaction = new JSONObject();
 				transaction.put("parents", Main.parents);
 				transaction.put("outputs", Main.outputs);
-				transaction.put("parentBeacon", Main.parentBeacon);
+				transaction.put("parentBeacon", Main.parentBeacon.toString());
 				transaction.put("date", date);
-				transaction.put("nonce", ""+Main.machineUid+workerId+nonce);
+				transaction.put("nonce", Converter.bytesToHex(Converter.longToBytes(Main.machineUid+workerId+nonce)));
 
 				VirgoAPI.getInstance().broadcastTransaction(transaction);
 				

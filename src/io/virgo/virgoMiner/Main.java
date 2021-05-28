@@ -18,6 +18,7 @@ import org.json.JSONObject;
 import io.virgo.randomX.RandomX;
 import io.virgo.randomX.RandomX.Flag;
 import io.virgo.virgoAPI.VirgoAPI;
+import io.virgo.virgoCryptoLib.Sha256Hash;
 import io.virgo.virgoCryptoLib.Utils;
 import io.virgo.virgoMiner.Utils.Miscellaneous;
 
@@ -28,8 +29,8 @@ public class Main {
 	private static ArrayList<String> providersList = new ArrayList<String>(Arrays.asList("http://35.164.199.2:8000/"));
 	public static String rewardAddress = "V2FRYJPZeSKW6cnam79ZHyaaYxRbzt9fVXG";
 	
-	public static volatile String parentBeacon = "";
-	public static volatile String header = "";
+	public static volatile Sha256Hash parentBeacon = null;
+	public static volatile byte[] header = null;
 	public static volatile JSONArray parents = null;
 	public static volatile JSONArray outputs = null;
 	public static volatile BigInteger difficulty = BigInteger.ZERO;
@@ -87,6 +88,9 @@ public class Main {
 			rx = new RandomX.Builder().recommendedFlags().flag(Flag.FULL_MEM).fastInit(true).build();
 			rx.init(key);
 			
+			System.out.println("running");
+			found = false;
+			
 			coreCount = Runtime.getRuntime().availableProcessors();
 			
 			for(int i = 0; i < coreCount; i++) {
@@ -94,7 +98,7 @@ public class Main {
 				workers.add(worker);
 				new Thread(worker).start();
 			}
-			
+						
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

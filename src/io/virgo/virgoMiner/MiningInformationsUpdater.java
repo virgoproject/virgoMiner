@@ -8,6 +8,7 @@ import io.virgo.virgoAPI.VirgoAPI;
 import io.virgo.virgoAPI.crypto.TxOutput;
 import io.virgo.virgoAPI.network.ResponseCode;
 import io.virgo.virgoAPI.requestsResponses.GetPoWInformationsResponse;
+import io.virgo.virgoCryptoLib.Sha256Hash;
 
 public class MiningInformationsUpdater implements Runnable {
 
@@ -23,18 +24,19 @@ public class MiningInformationsUpdater implements Runnable {
 		while(!Thread.currentThread().isInterrupted()) {
 			GetPoWInformationsResponse resp = VirgoAPI.getInstance().getPowInformations();
 			if(resp.getResponseCode() == ResponseCode.OK) {
-				
+
 				boolean changed = false;
 				
-				if(!Main.parentBeacon.equals(resp.getParentBeaconUid()))
+			
+				if(Main.parentBeacon != null && !Main.parentBeacon.equals(resp.getParentBeaconUid()))
 					changed = true;
 				
-				if(!Arrays.equals(Main.key, resp.getRandomXKey().getBytes())) {
-					Main.key = resp.getRandomXKey().getBytes();
+				if(!Arrays.equals(Main.key, resp.getRandomXKey().toBytes())) {
+					Main.key = resp.getRandomXKey().toBytes();
 					if(Main.rx != null) {
 						changed = true;
 						Main.found = true;
-						Main.rx.changeKey(resp.getRandomXKey().getBytes());
+						Main.rx.changeKey(resp.getRandomXKey().toBytes());
 					}
 
 				}
@@ -43,17 +45,15 @@ public class MiningInformationsUpdater implements Runnable {
 				Main.difficulty = resp.getDifficulty();
 				
 				JSONArray parents = new JSONArray();
-				for(String parent : resp.getParents())
-					parents.put(parent);
-				
+				for(Sha256Hash parent : resp.getParents())
+					parents.put(parent.toString());
+								
 				if(Main.parents != null && !parents.toString().equals(Main.parents.toString()))
 					changed = true;
 				
 				Main.parents = parents;
 				
-				Main.header = Main.parents.toString()
-						+ Main.outputs.toString()
-						+ Main.parentBeacon;
+				Main.header = (Main.parents.toString() + Main.outputs.toString()).getBytes();
 			
 				if(changed == true) {
 					for(Worker worker : Main.workers)

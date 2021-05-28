@@ -31,12 +31,12 @@
 	<dependency>
 	  <groupId>io.virgo</groupId>
 	  <artifactId>virgoCryptoLib</artifactId>
-	  <version>0.0.5</version>
+	  <version>0.0.5b</version>
 	</dependency>
   	<dependency>
 	  <groupId>io.virgo</groupId>
 	  <artifactId>virgoAPI</artifactId>
-	  <version>0.0.7q</version>
+	  <version>0.0.8g</version>
 	</dependency>
    <dependency>
       <groupId>io.virgo</groupId>
