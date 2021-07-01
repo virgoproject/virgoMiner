@@ -36,7 +36,7 @@
   	<dependency>
 	  <groupId>io.virgo</groupId>
 	  <artifactId>virgoAPI</artifactId>
-	  <version>0.0.8g</version>
+	  <version>0.0.8i</version>
 	</dependency>
    <dependency>
       <groupId>io.virgo</groupId>

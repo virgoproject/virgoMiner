@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -24,9 +25,9 @@ import io.virgo.virgoMiner.Utils.Miscellaneous;
 
 public class Main {
 
-	public static final String VERSION = "0.0.2";
+	public static final String VERSION = "0.0.3";
 	
-	private static ArrayList<String> providersList = new ArrayList<String>(Arrays.asList("http://35.164.199.2:8000/"));
+	private static ArrayList<String> providersList = new ArrayList<String>(Arrays.asList("http://eu.eagle.virgo.network:8000/", "http://us.eagle.virgo.network:8000/", "http://ap.eagle.virgo.network:8000/"));
 	public static String rewardAddress = "V2FRYJPZeSKW6cnam79ZHyaaYxRbzt9fVXG";
 	
 	public static volatile Sha256Hash parentBeacon = null;
@@ -36,7 +37,7 @@ public class Main {
 	public static volatile BigInteger difficulty = BigInteger.ZERO;
 	public static volatile boolean found = true;
 	
-	public static byte[] key = null;
+	public static volatile byte[] key = null;
 	
 	public static ArrayList<Worker> workers = new ArrayList<Worker>();
 	
@@ -57,6 +58,8 @@ public class Main {
 		System.out.println("Virgo Miner v"+VERSION);
 		
 		loadConfig();
+		
+		
 		
 		try {
 			
@@ -136,6 +139,8 @@ public class Main {
 				JSONObject config = new JSONObject(configString);
 				
 				JSONArray providers = config.getJSONArray("providers");
+				if(providers.length() != 0)
+					providersList.clear();
 				for(int i = 0; i< providers.length(); i++)
 					providersList.add(providers.getString(i));
 				
@@ -156,6 +161,23 @@ public class Main {
 		
 		System.out.println("config.json don't exist, creating one with default values");
 		
+		System.out.println("Please provide the address to which rewards should be sent:");
+		
+		Scanner in = new Scanner(System.in);
+		while(true) {
+			String address = in.nextLine();
+			
+			if(!Utils.validateAddress(address, VirgoAPI.ADDR_IDENTIFIER)) {
+				System.out.println("Invalid address, please try again:");
+				continue;
+			}
+			
+			rewardAddress = address;
+			break;
+		}
+		in.close();
+		System.out.println("Thanks!");
+		
 		try {
 			configFile.createNewFile();
 			
@@ -165,7 +187,6 @@ public class Main {
 			defaultConfig.put("providers", providers);
 			
 			defaultConfig.put("address", rewardAddress);
-			System.out.println("Warning: reward address not set, miner will give reward to Virgo's faucet");
 			
 			FileWriter writer = new FileWriter(configFile);
 			writer.write(defaultConfig.toString(4));
