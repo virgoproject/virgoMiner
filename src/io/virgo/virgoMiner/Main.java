@@ -27,7 +27,7 @@ public class Main {
 
 	public static final String VERSION = "0.0.3";
 	
-	private static ArrayList<String> providersList = new ArrayList<String>(Arrays.asList("http://eu.eagle.virgo.network:8000/", "http://us.eagle.virgo.network:8000/", "http://ap.eagle.virgo.network:8000/"));
+	private static ArrayList<String> providersList = new ArrayList<String>(Arrays.asList("https://ap.eagle.virgo.network:8000/","https://eu.eagle.virgo.network:8000/","https://us.eagle.virgo.network:8000/"));
 	public static String rewardAddress = "V2FRYJPZeSKW6cnam79ZHyaaYxRbzt9fVXG";
 	
 	public static volatile Sha256Hash parentBeacon = null;
